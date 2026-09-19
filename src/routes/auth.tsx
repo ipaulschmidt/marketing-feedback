@@ -30,7 +30,6 @@ export const Route = createFileRoute("/auth")({
 function AuthPage() {
   const { session, loading } = useAuth();
   const navigate = useNavigate();
-  const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
@@ -43,21 +42,8 @@ function AuthPage() {
     event.preventDefault();
     setBusy(true);
     try {
-      if (mode === "signup") {
-        const { data, error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo: window.location.origin },
-        });
-        if (error) throw error;
-        if (!data.session) {
-          toast.success("Check your inbox to confirm your email, then sign in.");
-          setMode("signin");
-        }
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) throw error;
-      }
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
     } catch (error) {
       toast.error(error instanceof Error ? error.message : "Something went wrong.");
     } finally {
@@ -98,19 +84,13 @@ function AuthPage() {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              autoComplete="current-password"
             />
           </div>
           <Button type="submit" className="w-full" disabled={busy}>
-            {mode === "signup" ? "Create account" : "Sign in"}
+            Sign in
           </Button>
-          <button
-            type="button"
-            className="w-full text-xs text-muted-foreground hover:text-foreground"
-            onClick={() => setMode(mode === "signup" ? "signin" : "signup")}
-          >
-            {mode === "signup" ? "Already have an account? Sign in" : "Need an account? Sign up"}
-          </button>
+          <p className="text-center text-xs text-muted-foreground">Private access · new accounts are disabled</p>
         </form>
       </div>
     </div>
