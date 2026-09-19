@@ -10,7 +10,6 @@ type RunTestInput = {
   goal: string;
   channelContext: string;
   designLabel: string;
-  referenceNote: string;
   designs: { fileName: string; mimeType: string; base64: string }[];
   references: { file: { fileName: string; mimeType: string; base64: string }; note: string }[];
 };

@@ -184,6 +184,14 @@ function NewPersona() {
               Reviews, testimonials, sales call notes, survey verbatims. This is what grounds the
               persona's actual words and objections instead of guessing them.
             </p>
+            <p className="mt-3 border-l-2 border-primary/60 pl-3 text-xs leading-relaxed text-muted-foreground">
+              Where to get this: your own CRM export (deal notes, support tickets, chat transcripts,
+              open-text survey responses), sales call transcripts if you use a call recording tool,
+              NPS/CSAT verbatims, or your own claimed G2/Capterra profile's official review export. To
+              reference public reviews of a competitor or category, copy a handful of representative
+              excerpts yourself and paste them in below. Most review sites' terms don't allow automated
+              scraping, so this tool doesn't attempt it.
+            </p>
           </div>
           <FilePicker
             label="Files (.xlsx, .csv, .pdf, .txt, .docx)"

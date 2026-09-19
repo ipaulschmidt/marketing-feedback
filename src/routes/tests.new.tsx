@@ -8,6 +8,7 @@ import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
 import { Button } from "@/components/ui/button";
+import { SelectedFiles, type SelectedFile } from "@/components/SelectedFiles";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -49,13 +50,12 @@ function NewTest() {
   const run = useServerFn(runDesignTest);
 
   const [personaId, setPersonaId] = useState(search.persona ?? "");
-  const [designFile, setDesignFile] = useState<File | null>(null);
+  const [designFiles, setDesignFiles] = useState<SelectedFile[]>([]);
   const [designType, setDesignType] = useState("");
   const [goal, setGoal] = useState("");
   const [channelContext, setChannelContext] = useState("");
   const [designLabel, setDesignLabel] = useState("");
-  const [referenceFile, setReferenceFile] = useState<File | null>(null);
-  const [referenceNote, setReferenceNote] = useState("");
+  const [referenceFiles, setReferenceFiles] = useState<SelectedFile[]>([]);
   const [busy, setBusy] = useState(false);
 
   const { data: personas } = useQuery({
@@ -75,8 +75,8 @@ function NewTest() {
       toast.error("Pick a persona first.");
       return;
     }
-    if (!designFile) {
-      toast.error("Upload the design you want tested.");
+    if (designFiles.length === 0) {
+      toast.error("Upload at least one design image.");
       return;
     }
     setBusy(true);
@@ -88,9 +88,13 @@ function NewTest() {
           goal,
           channelContext,
           designLabel,
-          referenceNote,
-          design: await fileToPayload(designFile),
-          reference: referenceFile ? await fileToPayload(referenceFile) : null,
+          designs: await Promise.all(designFiles.map(({ file }) => fileToPayload(file))),
+          references: await Promise.all(
+            referenceFiles.map(async ({ file, note }) => ({
+              file: await fileToPayload(file),
+              note: note ?? "",
+            })),
+          ),
         },
       });
       navigate({ to: "/tests/$testId", params: { testId: result.testId } });
@@ -128,17 +132,23 @@ function NewTest() {
           </div>
 
           <div className="space-y-2">
-            <Label className="label-eyebrow">Design (PNG, JPG or PDF)</Label>
+            <Label className="label-eyebrow">Design images or pages (PNG, JPG or PDF)</Label>
             <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border bg-muted/40 px-3 py-3 text-sm text-muted-foreground hover:border-primary hover:text-foreground">
               <Upload className="size-4" />
-              {designFile ? designFile.name : "Choose file"}
+              Choose one or more files
               <input
                 type="file"
                 accept="image/png,image/jpeg,image/webp,application/pdf"
+                multiple
                 className="hidden"
-                onChange={(e) => setDesignFile(e.target.files?.[0] ?? null)}
+                onChange={(event) => {
+                  const next = Array.from(event.target.files ?? []).map((file) => ({ file }));
+                  setDesignFiles(next);
+                  event.target.value = "";
+                }}
               />
             </label>
+            <SelectedFiles items={designFiles} onChange={setDesignFiles} />
           </div>
 
           <div className="space-y-1.5">
@@ -196,29 +206,26 @@ function NewTest() {
             <span className="text-sm font-normal text-muted-foreground">(optional)</span>
           </h2>
           <p className="mt-1 text-sm text-muted-foreground">
-            Add a screenshot of something comparable already in the market. Links are kept as notes
-            only — nothing is fetched from the web.
+            Add one or more comparable examples already in the market. Give each its own note. Links
+            are kept as notes only — nothing is fetched from the web.
           </p>
         </div>
         <label className="flex cursor-pointer items-center gap-2 rounded-md border border-dashed border-border bg-muted/40 px-3 py-3 text-sm text-muted-foreground hover:border-primary hover:text-foreground">
           <Upload className="size-4" />
-          {referenceFile ? referenceFile.name : "Choose reference image or PDF"}
+          Choose one or more reference images or PDFs
           <input
             type="file"
             accept="image/png,image/jpeg,image/webp,application/pdf"
+            multiple
             className="hidden"
-            onChange={(e) => setReferenceFile(e.target.files?.[0] ?? null)}
+            onChange={(event) => {
+              const next = Array.from(event.target.files ?? []).map((file) => ({ file, note: "" }));
+              setReferenceFiles(next);
+              event.target.value = "";
+            }}
           />
         </label>
-        <div className="space-y-1.5">
-          <Label className="label-eyebrow">Note about the reference</Label>
-          <Textarea
-            rows={2}
-            value={referenceNote}
-            onChange={(e) => setReferenceNote(e.target.value)}
-            placeholder="e.g. competitor's booth at SaaStr 2025"
-          />
-        </div>
+        <SelectedFiles items={referenceFiles} notes onChange={setReferenceFiles} />
       </section>
 
       <div className="mt-6 space-y-3">
