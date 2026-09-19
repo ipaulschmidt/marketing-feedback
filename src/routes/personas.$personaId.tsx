@@ -15,12 +15,12 @@ import type { FeedbackResult, ParseReport, PersonaStructured } from "@/lib/perso
 export const Route = createFileRoute("/personas/$personaId")({
   head: () => ({
     meta: [
-      { title: "Persona detail — Audience Gut Check" },
+      { title: "Persona detail — First Glance" },
       {
         name: "description",
         content: "Edit a saved audience persona and review every design test run against it.",
       },
-      { property: "og:title", content: "Persona detail — Audience Gut Check" },
+      { property: "og:title", content: "Persona detail — First Glance" },
       {
         property: "og:description",
         content: "Edit a saved audience persona and review every design test run against it.",
