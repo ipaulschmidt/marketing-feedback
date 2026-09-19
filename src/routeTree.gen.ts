@@ -10,33 +10,102 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as PersonasPersonaIdRouteImport } from './routes/personas.$personaId'
+import { Route as PersonasNewRouteImport } from './routes/personas.new'
+import { Route as TestsTestIdRouteImport } from './routes/tests.$testId'
+import { Route as TestsNewRouteImport } from './routes/tests.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PersonasPersonaIdRoute = PersonasPersonaIdRouteImport.update({
+  id: '/personas/$personaId',
+  path: '/personas/$personaId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PersonasNewRoute = PersonasNewRouteImport.update({
+  id: '/personas/new',
+  path: '/personas/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestsTestIdRoute = TestsTestIdRouteImport.update({
+  id: '/tests/$testId',
+  path: '/tests/$testId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TestsNewRoute = TestsNewRouteImport.update({
+  id: '/tests/new',
+  path: '/tests/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/personas/$personaId': typeof PersonasPersonaIdRoute
+  '/personas/new': typeof PersonasNewRoute
+  '/tests/$testId': typeof TestsTestIdRoute
+  '/tests/new': typeof TestsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/personas/$personaId': typeof PersonasPersonaIdRoute
+  '/personas/new': typeof PersonasNewRoute
+  '/tests/$testId': typeof TestsTestIdRoute
+  '/tests/new': typeof TestsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/personas/$personaId': typeof PersonasPersonaIdRoute
+  '/personas/new': typeof PersonasNewRoute
+  '/tests/$testId': typeof TestsTestIdRoute
+  '/tests/new': typeof TestsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/personas/$personaId'
+    | '/personas/new'
+    | '/tests/$testId'
+    | '/tests/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/personas/$personaId'
+    | '/personas/new'
+    | '/tests/$testId'
+    | '/tests/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/auth'
+    | '/personas/$personaId'
+    | '/personas/new'
+    | '/tests/$testId'
+    | '/tests/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthRoute: typeof AuthRoute
+  PersonasPersonaIdRoute: typeof PersonasPersonaIdRoute
+  PersonasNewRoute: typeof PersonasNewRoute
+  TestsTestIdRoute: typeof TestsTestIdRoute
+  TestsNewRoute: typeof TestsNewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +117,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/personas/$personaId': {
+      id: '/personas/$personaId'
+      path: '/personas/$personaId'
+      fullPath: '/personas/$personaId'
+      preLoaderRoute: typeof PersonasPersonaIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/personas/new': {
+      id: '/personas/new'
+      path: '/personas/new'
+      fullPath: '/personas/new'
+      preLoaderRoute: typeof PersonasNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tests/$testId': {
+      id: '/tests/$testId'
+      path: '/tests/$testId'
+      fullPath: '/tests/$testId'
+      preLoaderRoute: typeof TestsTestIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tests/new': {
+      id: '/tests/new'
+      path: '/tests/new'
+      fullPath: '/tests/new'
+      preLoaderRoute: typeof TestsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthRoute: AuthRoute,
+  PersonasPersonaIdRoute: PersonasPersonaIdRoute,
+  PersonasNewRoute: PersonasNewRoute,
+  TestsTestIdRoute: TestsTestIdRoute,
+  TestsNewRoute: TestsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
