@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Check, Copy, Loader2, Minus, Printer, RotateCcw, Timer } from "lucide-react";
+import { Check, Copy, Loader2, Minus, Printer, RotateCcw } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { AppShell } from "@/components/AppShell";
@@ -71,6 +71,13 @@ function GroundingBadge({ label, present }: { label: string; present: boolean })
   );
 }
 
+function blinkRating(feedback: FeedbackResult): number {
+  if (typeof feedback.blinkTest.rating === "number") return feedback.blinkTest.rating;
+  if (feedback.blinkTest.verdict === "stops to look closer") return 4;
+  if (feedback.blinkTest.verdict === "brief pause, keeps moving") return 2;
+  return 1;
+}
+
 function asText(feedback: FeedbackResult, personaName: string): string {
   const lines = [
     `Audience Gut Check — ${personaName}`,
@@ -80,7 +87,7 @@ function asText(feedback: FeedbackResult, personaName: string): string {
       : "",
     `GUT REACTION: ${feedback.gutReaction}`,
     feedback.blinkTest
-      ? `BLINK TEST: ${feedback.blinkTest.verdict}\nRegisters: ${feedback.blinkTest.whatRegistersInWindow}\n${feedback.blinkTest.reasoning}`
+      ? `BLINK TEST (${blinkRating(feedback)}/5): ${feedback.blinkTest.verdict}\nRegisters: ${feedback.blinkTest.whatRegistersInWindow}\n${feedback.blinkTest.reasoning}`
       : "",
     `PERSONA QUOTE: "${feedback.personaQuote}"`,
     "",
@@ -184,6 +191,8 @@ function ReportPage() {
 
   return (
     <AppShell>
+      <p className="rounded-md border border-warning/50 bg-warning/10 px-4 py-3 text-sm font-medium text-foreground">{DISCLAIMER}</p>
+
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div className="space-y-1">
           <p className="label-eyebrow">{data.design_type || "Design"} · {new Date(data.created_at).toLocaleString()}</p>
@@ -213,27 +222,22 @@ function ReportPage() {
         <GroundingBadge label="Reference examples" present={references.length > 0} />
       </div>
 
-      <p className="mt-4 rounded-md border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">{DISCLAIMER}</p>
-
       <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <main className="min-w-0 space-y-6">
-          <div className="grid gap-3 md:grid-cols-2">
-            <section className="panel grain-top space-y-4 p-6">
-              <p className="label-eyebrow">Gut reaction</p>
-              <p className="font-display text-xl leading-snug">{feedback.gutReaction}</p>
-              <blockquote className="border-l-2 border-primary pl-4 text-base italic text-muted-foreground">“{feedback.personaQuote}”</blockquote>
-            </section>
-            {feedback.blinkTest && (
-              <section className="panel space-y-3 p-6">
-                <div className="flex items-center gap-2"><Timer className="size-4 text-primary" /><p className="label-eyebrow">3–5 second blink test</p></div>
-                <p className="font-display text-lg font-semibold capitalize">{feedback.blinkTest.verdict}</p>
-                <p className="text-sm text-foreground">{feedback.blinkTest.whatRegistersInWindow}</p>
-                <p className="text-xs leading-relaxed text-muted-foreground">{feedback.blinkTest.reasoning}</p>
-              </section>
-            )}
-          </div>
+          <section className="panel grain-top space-y-4 p-6">
+            <p className="label-eyebrow">Gut reaction</p>
+            <p className="font-display text-xl leading-snug">{feedback.gutReaction}</p>
+            <blockquote className="border-l-2 border-primary pl-4 text-base italic text-muted-foreground">“{feedback.personaQuote}”</blockquote>
+          </section>
 
           <div className="grid gap-3 sm:grid-cols-2">
+            {feedback.blinkTest && (
+              <ScoreBlock
+                title={`Blink test · ${feedback.blinkTest.verdict}`}
+                rating={blinkRating(feedback)}
+                reasoning={`${feedback.blinkTest.whatRegistersInWindow} ${feedback.blinkTest.reasoning}`}
+              />
+            )}
             <ScoreBlock title="Message clarity" rating={feedback.messageClarity.rating} reasoning={feedback.messageClarity.reasoning} />
             <ScoreBlock title="Visual hierarchy" rating={feedback.visualHierarchy.rating} reasoning={feedback.visualHierarchy.reasoning} />
             <ScoreBlock title="Credibility & trust" rating={feedback.credibilityAndTrust.rating} reasoning={feedback.credibilityAndTrust.reasoning} />

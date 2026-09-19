@@ -35,6 +35,7 @@ export type FeedbackResult = {
   };
   gutReaction: string;
   blinkTest: {
+    rating?: number;
     verdict: "walks by / scrolls past" | "brief pause, keeps moving" | "stops to look closer";
     whatRegistersInWindow: string;
     reasoning: string;

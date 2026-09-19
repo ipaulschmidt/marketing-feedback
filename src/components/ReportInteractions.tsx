@@ -19,6 +19,7 @@ export function AnnotatedDesign({
   const url = useSignedUrl(path);
   const [active, setActive] = useState<number | null>(null);
   const imageCallouts = callouts.filter((callout) => callout.designImageNumber === imageNumber);
+  const activeCallout = imageCallouts.find((callout) => callout.number === active) ?? null;
   const isPdf = path.toLowerCase().endsWith(".pdf");
 
   if (isPdf) {
@@ -51,25 +52,36 @@ export function AnnotatedDesign({
                 aria-label={`${callout.label}: ${callout.note}`}
                 onClick={() => setActive(selected ? null : callout.number)}
                 className={cn(
-                  "report-affordance size-8 rounded-full border-2 border-background font-mono text-xs shadow-lg transition-transform hover:scale-110",
+                  "report-affordance size-10 rounded-full border-[3px] border-background bg-primary font-mono text-sm font-bold text-primary-foreground shadow-xl transition-transform hover:scale-110",
                   index === 0 && "report-attention",
-                  selected && "scale-110 ring-2 ring-primary",
+                  selected && "scale-110 ring-2 ring-foreground ring-offset-2 ring-offset-background",
                 )}
               >
                 {callout.number}
               </Button>
-              {selected && (
-                <div className="absolute left-1/2 top-10 z-20 w-56 -translate-x-1/2 rounded-md border border-border bg-popover p-3 text-left shadow-xl">
-                  <p className="text-xs font-semibold text-popover-foreground">{callout.label}</p>
-                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{callout.note}</p>
-                </div>
-              )}
             </div>
           );
         })}
       </div>
       {imageCallouts.length > 0 && (
-        <p className="text-center font-mono text-[10px] text-muted-foreground">Hover or tap a numbered pin · positions are approximate</p>
+        <div className="space-y-2">
+          <p className="text-center font-mono text-[10px] text-muted-foreground">Hover or tap a numbered pin · positions are approximate</p>
+          <div className="min-h-24 rounded-md border border-border bg-popover p-4" aria-live="polite">
+            {activeCallout ? (
+              <>
+                <div className="flex items-start gap-3">
+                  <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-primary font-mono text-xs font-bold text-primary-foreground">{activeCallout.number}</span>
+                  <div>
+                    <p className="text-sm font-semibold text-popover-foreground">{activeCallout.label}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground">{activeCallout.note}</p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-muted-foreground">Select a numbered pin to read the observation.</p>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
