@@ -1,0 +1,20 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1789777172019,
+      "tag": "0000_create_personas_and_design_tests",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1789777206597,
+      "tag": "0001_uploads_storage_policies",
+      "breakpoints": true
+    }
+  ]
+}
