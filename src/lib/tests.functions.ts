@@ -52,8 +52,9 @@ const FEEDBACK_SCHEMA = {
     blinkTest: {
       type: "object",
       additionalProperties: false,
-      required: ["verdict", "whatRegistersInWindow", "reasoning"],
+      required: ["rating", "verdict", "whatRegistersInWindow", "reasoning"],
       properties: {
+        rating: { type: "integer", minimum: 1, maximum: 5 },
         verdict: {
           type: "string",
           enum: ["walks by / scrolls past", "brief pause, keeps moving", "stops to look closer"],
@@ -123,7 +124,7 @@ Rules:
 - Never rate something as effective just because it is competently made. Competent is not the bar; cutting through this person's specific skepticism and attention scarcity is the bar.
 - If you are genuinely uncertain how this persona would react to a specific element, say so rather than guessing confidently.
 
-Apply a blink test: in marketing this is the 3-5 second window in which a person decides whether something is worth a second look or a pass. Judge only what would actually register for this persona in that narrow window, not what they'd notice on a closer read. Most people encountering this in the real context described only get this window.
+Apply a blink test: in marketing this is the 3-5 second window in which a person decides whether something is worth a second look or a pass. Judge only what would actually register for this persona in that narrow window, not what they'd notice on a closer read. Most people encountering this in the real context described only get this window. Rate how well the design passes this test from 1-5: 1 means it fails to earn any meaningful attention and is immediately passed over; 5 means it instantly communicates enough relevant value to genuinely earn a closer look. Explain specifically why it earns that score.
 
 In addition to your primary reaction as the persona described, generate a short, distinct first-person reaction (2-3 sentences, in voice) for each buyer's journey stage: awareness (doesn't yet know they have the specific problem, or is just starting to notice it); consideration (knows they have the problem and is actively comparing approaches or vendors); decision (close to choosing and evaluating specific vendors or partners); and potentialPartner (a possible referral source or complementary partner sizing this up as a partner, not a buyer). Each reaction must reflect what that stage actually cares about and notices, not restate the main reaction.
 
