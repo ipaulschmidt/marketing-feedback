@@ -56,7 +56,7 @@ function PersonaDetail() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("design_tests")
-        .select("id, design_image_url, design_type, design_label, feedback_result, created_at")
+        .select("id, design_image_url, design_image_urls, design_type, design_label, feedback_result, created_at")
         .eq("persona_id", personaId)
         .order("created_at", { ascending: false });
       if (error) throw error;
@@ -143,7 +143,7 @@ function PersonaDetail() {
               className="panel flex gap-4 p-4 transition-colors hover:border-primary"
             >
               <StoredImage
-                path={test.design_image_url}
+                path={test.design_image_urls?.[0] ?? test.design_image_url}
                 alt="Tested design"
                 className="h-20 w-20 shrink-0 rounded-md object-cover"
               />

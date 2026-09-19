@@ -15,6 +15,13 @@
       "when": 1789777206597,
       "tag": "0001_uploads_storage_policies",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1789780903338,
+      "tag": "0002_add_reference_example_images",
+      "breakpoints": true
     }
   ]
 }

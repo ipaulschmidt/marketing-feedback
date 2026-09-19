@@ -27,6 +27,7 @@ export type Database = {
           id: string
           persona_id: string
           reference_example_image_url: string | null
+          reference_example_images: Json | null
           reference_example_note: string | null
           user_id: string
         }
@@ -42,6 +43,7 @@ export type Database = {
           id?: string
           persona_id: string
           reference_example_image_url?: string | null
+          reference_example_images?: Json | null
           reference_example_note?: string | null
           user_id?: string
         }
@@ -57,6 +59,7 @@ export type Database = {
           id?: string
           persona_id?: string
           reference_example_image_url?: string | null
+          reference_example_images?: Json | null
           reference_example_note?: string | null
           user_id?: string
         }

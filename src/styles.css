@@ -133,6 +133,18 @@
   }
 }
 
+@keyframes report-attention {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--color-primary) 0%, transparent); }
+  50% { box-shadow: 0 0 0 5px color-mix(in oklch, var(--color-primary) 18%, transparent); }
+}
+
+.report-attention { animation: report-attention 1.8s ease-in-out 2; }
+
+@media (prefers-reduced-motion: reduce) {
+  .report-attention { animation: none; }
+  .report-affordance { transition: none; }
+}
+
 @utility label-eyebrow {
   font-family: var(--font-mono);
   font-size: 0.6875rem;
