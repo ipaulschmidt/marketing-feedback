@@ -17,13 +17,13 @@ import {
 export const Route = createFileRoute("/tests/$testId")({
   head: () => ({
     meta: [
-      { title: "Feedback report — Audience Gut Check" },
+      { title: "Feedback report — First Glance" },
       {
         name: "description",
         content:
           "A directional, deliberately critical simulated reaction to your design from your audience persona.",
       },
-      { property: "og:title", content: "Feedback report — Audience Gut Check" },
+      { property: "og:title", content: "Feedback report — First Glance" },
       {
         property: "og:description",
         content:
@@ -80,7 +80,7 @@ function blinkRating(feedback: FeedbackResult): number {
 
 function asText(feedback: FeedbackResult, personaName: string): string {
   const lines = [
-    `Audience Gut Check — ${personaName}`,
+    `First Glance — ${personaName}`,
     "",
     feedback.executiveSummary
       ? `EXECUTIVE VERDICT: ${feedback.executiveSummary.overallVerdict}\n${feedback.executiveSummary.oneLineSummary}`

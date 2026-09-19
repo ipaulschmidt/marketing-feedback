@@ -27,12 +27,12 @@ export const Route = createFileRoute("/tests/new")({
   validateSearch: z.object({ persona: z.string().optional() }),
   head: () => ({
     meta: [
-      { title: "New design test — Audience Gut Check" },
+      { title: "New design test — First Glance" },
       {
         name: "description",
         content: "Upload a design and get an honest, specific reaction from your audience persona.",
       },
-      { property: "og:title", content: "New design test — Audience Gut Check" },
+      { property: "og:title", content: "New design test — First Glance" },
       {
         property: "og:description",
         content: "Upload a design and get an honest, specific reaction from your audience persona.",

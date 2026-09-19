@@ -10,12 +10,12 @@ import { Label } from "@/components/ui/label";
 export const Route = createFileRoute("/auth")({
   head: () => ({
     meta: [
-      { title: "Sign in — Audience Gut Check" },
+      { title: "Sign in — First Glance" },
       {
         name: "description",
         content: "Sign in to test your marketing creative against a data-grounded audience persona.",
       },
-      { property: "og:title", content: "Sign in — Audience Gut Check" },
+      { property: "og:title", content: "Sign in — First Glance" },
       {
         property: "og:description",
         content: "Sign in to test your marketing creative against a data-grounded audience persona.",
@@ -55,7 +55,7 @@ function AuthPage() {
     <div className="grain-top flex min-h-screen items-center justify-center px-5">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-2">
-          <p className="label-eyebrow">Audience Gut Check</p>
+          <p className="label-eyebrow">First Glance</p>
           <h1 className="text-3xl font-bold">
             Honest reactions, before you pay for real ones.
           </h1>

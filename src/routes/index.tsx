@@ -10,13 +10,13 @@ import { Badge } from "@/components/ui/badge";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Persona library — Audience Gut Check" },
+      { title: "Persona library — First Glance" },
       {
         name: "description",
         content:
           "Your saved audience personas, built from SparkToro exports and real customer voice data.",
       },
-      { property: "og:title", content: "Persona library — Audience Gut Check" },
+      { property: "og:title", content: "Persona library — First Glance" },
       {
         property: "og:description",
         content:

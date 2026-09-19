@@ -18,13 +18,13 @@ import type { ParseReport, PersonaStructured } from "@/lib/persona-schema";
 export const Route = createFileRoute("/personas/new")({
   head: () => ({
     meta: [
-      { title: "New persona — Audience Gut Check" },
+      { title: "New persona — First Glance" },
       {
         name: "description",
         content:
           "Import a SparkToro audience export and optional customer voice data to build a grounded persona.",
       },
-      { property: "og:title", content: "New persona — Audience Gut Check" },
+      { property: "og:title", content: "New persona — First Glance" },
       {
         property: "og:description",
         content:

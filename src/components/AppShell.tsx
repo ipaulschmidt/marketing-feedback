@@ -27,7 +27,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" className="flex items-baseline gap-2">
             <span className="font-display text-base font-bold tracking-tight">
-              Audience Gut Check
+              First Glance
             </span>
             <span className="label-eyebrow hidden sm:inline">honest synthetic feedback</span>
           </Link>
