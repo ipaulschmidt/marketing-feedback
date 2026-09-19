@@ -11,8 +11,8 @@ type RunTestInput = {
   channelContext: string;
   designLabel: string;
   referenceNote: string;
-  design: { fileName: string; mimeType: string; base64: string };
-  reference: { fileName: string; mimeType: string; base64: string } | null;
+  designs: { fileName: string; mimeType: string; base64: string }[];
+  references: { file: { fileName: string; mimeType: string; base64: string }; note: string }[];
 };
 
 const rating = {
@@ -27,6 +27,8 @@ const FEEDBACK_SCHEMA = {
   additionalProperties: false,
   required: [
     "gutReaction",
+    "executiveSummary",
+    "blinkTest",
     "messageClarity",
     "visualHierarchy",
     "credibilityAndTrust",
@@ -37,9 +39,30 @@ const FEEDBACK_SCHEMA = {
     "biggestOpportunity",
     "personaQuote",
     "confidenceNote",
+    "buyerJourneyReactions",
+    "visualCallouts",
   ],
   properties: {
+    executiveSummary: {
+      type: "object",
+      additionalProperties: false,
+      required: ["overallVerdict", "oneLineSummary"],
+      properties: { overallVerdict: str, oneLineSummary: str },
+    },
     gutReaction: str,
+    blinkTest: {
+      type: "object",
+      additionalProperties: false,
+      required: ["verdict", "whatRegistersInWindow", "reasoning"],
+      properties: {
+        verdict: {
+          type: "string",
+          enum: ["walks by / scrolls past", "brief pause, keeps moving", "stops to look closer"],
+        },
+        whatRegistersInWindow: str,
+        reasoning: str,
+      },
+    },
     messageClarity: rating,
     visualHierarchy: rating,
     credibilityAndTrust: rating,
@@ -50,6 +73,30 @@ const FEEDBACK_SCHEMA = {
     biggestOpportunity: str,
     personaQuote: str,
     confidenceNote: str,
+    buyerJourneyReactions: {
+      type: "object",
+      additionalProperties: false,
+      required: ["awareness", "consideration", "decision", "potentialPartner"],
+      properties: { awareness: str, consideration: str, decision: str, potentialPartner: str },
+    },
+    visualCallouts: {
+      type: "array",
+      minItems: 3,
+      maxItems: 5,
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["number", "designImageNumber", "label", "approxX", "approxY", "note"],
+        properties: {
+          number: { type: "integer", minimum: 1, maximum: 5 },
+          designImageNumber: { type: "integer", minimum: 1 },
+          label: str,
+          approxX: { type: "number", minimum: 0, maximum: 100 },
+          approxY: { type: "number", minimum: 0, maximum: 100 },
+          note: str,
+        },
+      },
+    },
   },
 };
 
@@ -58,14 +105,11 @@ function buildSystemPrompt(args: {
   designType: string;
   goal: string;
   channelContext: string;
-  referenceProvided: boolean;
-  referenceNote: string;
+  referenceNotes: string[];
 }): string {
   const designType = args.designType || "marketing design";
-  const referenceBlock = args.referenceProvided
-    ? `A reference example has also been provided: an actual comparable design already in the market${
-        args.referenceNote ? `, described as: ${args.referenceNote}` : ""
-      }. Use it as a concrete point of comparison, not just background. Name specific similarities and differences between the design being tested and this reference when forming your genericVsDistinct judgment, rather than relying only on inferred category norms.\n\n`
+  const referenceBlock = args.referenceNotes.length > 0
+    ? `Reference examples already in the market have also been provided${args.referenceNotes.some(Boolean) ? ` with these notes: ${args.referenceNotes.map((note, index) => `Reference Example ${String.fromCharCode(65 + index)}: ${note || "no note"}`).join("; ")}` : ""}. Use them as concrete points of comparison, not just background. Name specific similarities and differences between the design being tested and these references when forming your genericVsDistinct judgment, rather than relying only on inferred category norms.\n\n`
     : "";
 
   return `You are simulating a real, specific member of an audience segment, built from actual audience intelligence data and, where available, real customer voice data (not a generic reviewer, not a helpful assistant). Persona: ${args.personaJson}. You are looking at a ${designType} whose stated goal is: ${args.goal || "(not stated)"}. You will encounter it in this context: ${args.channelContext || "(not stated)"}.
@@ -80,13 +124,22 @@ Rules:
 - Never rate something as effective just because it is competently made. Competent is not the bar; cutting through this person's specific skepticism and attention scarcity is the bar.
 - If you are genuinely uncertain how this persona would react to a specific element, say so rather than guessing confidently.
 
+Apply a blink test: in marketing this is the 3-5 second window in which a person decides whether something is worth a second look or a pass. Judge only what would actually register for this persona in that narrow window, not what they'd notice on a closer read. Most people encountering this in the real context described only get this window.
+
+In addition to your primary reaction as the persona described, generate a short, distinct first-person reaction (2-3 sentences, in voice) for each buyer's journey stage: awareness (doesn't yet know they have the specific problem, or is just starting to notice it); consideration (knows they have the problem and is actively comparing approaches or vendors); decision (close to choosing and evaluating specific vendors or partners); and potentialPartner (a possible referral source or complementary partner sizing this up as a partner, not a buyer). Each reaction must reflect what that stage actually cares about and notices, not restate the main reaction.
+
+After completing the full analysis, write a one-sentence executive summary that a busy leader reading only this line would still walk away with the right takeaway, and choose the overallVerdict label honestly, not diplomatically. A weak design should get a label that says so.
+
+Identify 3 to 5 of the most important points across the design images and assign each to its Design Photo number. Estimate its approximate position as a percentage of image width and height from the top-left corner. These are best-effort visual estimates, not pixel-precise coordinates. Limit them to first attention, second attention, the biggest friction point, and any key credibility or CTA element.
+
 Ratings are 1-5 where 1 means it fails this persona completely and 5 is reserved for work that genuinely cuts through. Most real-world work lands at 2 or 3; do not inflate.
 
 Return ONLY valid JSON matching the provided schema.`;
 }
 
 function filePart(file: { fileName: string; mimeType: string; base64: string }, label: string): InputPart[] {
-  const raw = file.base64.includes(",") ? file.base64.split(",")[1]! : file.base64;
+  const split = file.base64.split(",");
+  const raw = file.base64.includes(",") ? (split[1] ?? "") : file.base64;
   const isPdf = file.mimeType === "application/pdf" || file.fileName.toLowerCase().endsWith(".pdf");
   if (isPdf) {
     return [
@@ -114,9 +167,16 @@ export const runDesignTest = createServerFn({ method: "POST" })
 
     const structured = persona.structured_data as unknown as PersonaStructured;
 
+    if (data.designs.length === 0) throw new Error("Upload at least one design image.");
+
     const content: InputPart[] = [
-      ...filePart(data.design, "THE DESIGN BEING TESTED:"),
-      ...(data.reference ? filePart(data.reference, "REFERENCE EXAMPLE (already in the market):") : []),
+      ...data.designs.flatMap((design, index) => filePart(design, `DESIGN PHOTO ${index + 1}:`)),
+      ...data.references.flatMap((reference, index) =>
+        filePart(
+          reference.file,
+          `REFERENCE EXAMPLE ${String.fromCharCode(65 + index)} (already in the market)${reference.note ? ` — ${reference.note}` : ""}:`,
+        ),
+      ),
       {
         type: "input_text",
         text: "React now, as this persona. Be honest and specific. Return only the JSON.",
@@ -129,8 +189,7 @@ export const runDesignTest = createServerFn({ method: "POST" })
         designType: data.designType,
         goal: data.goal,
         channelContext: data.channelContext,
-        referenceProvided: Boolean(data.reference),
-        referenceNote: data.referenceNote,
+        referenceNotes: data.references.map((reference) => reference.note),
       }),
       schemaName: "design_feedback",
       schema: FEEDBACK_SCHEMA,
@@ -139,10 +198,11 @@ export const runDesignTest = createServerFn({ method: "POST" })
 
     const put = async (file: { fileName: string; mimeType: string; base64: string }, folder: string) => {
       const path = `${context.userId}/${folder}/${Date.now()}-${file.fileName.replace(/[^\w.\-]/g, "_")}`;
-      const raw = file.base64.includes(",") ? file.base64.split(",")[1]! : file.base64;
+      const split = file.base64.split(",");
+      const raw = file.base64.includes(",") ? (split[1] ?? "") : file.base64;
       const binary = atob(raw);
       const bytes = new Uint8Array(binary.length);
-      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)!;
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
       const { error } = await context.supabase.storage
         .from("uploads")
         .upload(path, bytes, { contentType: file.mimeType || "application/octet-stream" });
@@ -153,22 +213,29 @@ export const runDesignTest = createServerFn({ method: "POST" })
       return path;
     };
 
-    const designPath = await put(data.design, "designs");
-    const referencePath = data.reference ? await put(data.reference, "references") : null;
+    const designPaths = (await Promise.all(data.designs.map((design) => put(design, "designs")))).filter(
+      (path): path is string => Boolean(path),
+    );
+    const referenceImages = (
+      await Promise.all(
+        data.references.map(async (reference) => ({
+          url: await put(reference.file, "references"),
+          note: reference.note,
+        })),
+      )
+    ).filter((reference): reference is { url: string; note: string } => Boolean(reference.url));
 
     const { data: inserted, error: insertError } = await context.supabase
       .from("design_tests")
       .insert({
         user_id: context.userId,
         persona_id: data.personaId,
-        design_image_url: designPath,
-        design_image_urls: designPath ? [designPath] : [],
+        design_image_urls: designPaths,
         design_label: data.designLabel || null,
         design_type: data.designType || null,
         goal: data.goal || null,
         channel_context: data.channelContext || null,
-        reference_example_image_url: referencePath,
-        reference_example_note: data.referenceNote || null,
+        reference_example_images: referenceImages as unknown as Json,
         feedback_result: feedback as unknown as Json,
       })
       .select("id")

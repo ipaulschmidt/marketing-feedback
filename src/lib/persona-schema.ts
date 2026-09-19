@@ -29,7 +29,16 @@ export type ParseReport = {
 export type Rating = { rating: number; reasoning: string };
 
 export type FeedbackResult = {
+  executiveSummary: {
+    overallVerdict: string;
+    oneLineSummary: string;
+  };
   gutReaction: string;
+  blinkTest: {
+    verdict: "walks by / scrolls past" | "brief pause, keeps moving" | "stops to look closer";
+    whatRegistersInWindow: string;
+    reasoning: string;
+  };
   messageClarity: Rating;
   visualHierarchy: Rating;
   credibilityAndTrust: Rating;
@@ -40,7 +49,23 @@ export type FeedbackResult = {
   biggestOpportunity: string;
   personaQuote: string;
   confidenceNote: string;
+  buyerJourneyReactions: {
+    awareness: string;
+    consideration: string;
+    decision: string;
+    potentialPartner: string;
+  };
+  visualCallouts: {
+    number: number;
+    designImageNumber: number;
+    label: string;
+    approxX: number;
+    approxY: number;
+    note: string;
+  }[];
 };
+
+export type ReferenceExample = { url: string; note: string };
 
 export const DESIGN_TYPES = [
   "Email",
